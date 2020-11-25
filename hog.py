@@ -4,17 +4,16 @@
 # University of Illinois at Chicago
 # 11/20/2020
 
+import gzip
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 import os
 import math
+from skimage.feature import hog
 
 
 def load_mnist(path, kind='train'):
-    import os
-    import gzip
-    import numpy as np
 
     """Load MNIST data from `path`"""
     labels_path = os.path.join(path,
@@ -35,14 +34,27 @@ def load_mnist(path, kind='train'):
     return images, labels
 
 
+def hog_for_array(image_array):
+    hog_features_data = []
+    for img in image_array:
+        img = img.reshape(28, 28)
+        fd = hog(img,
+                 orientations=10,
+                 pixels_per_cell=(7, 7),
+                 cells_per_block=(4, 4))
+        hog_features_data.append(fd)
+        plt.hist(fd)
+        plt.show()
+    hog_features = np.array(hog_features_data, 'float64')
+    return np.float32(hog_features)
+
+
 def main():
     plt.gray()
     x_train, y_train = load_mnist('fashion-mnist/data/fashion', kind='train')
     x_test, y_test = load_mnist('fashion-mnist/data/fashion', kind='t10k')
-    test_image = x_train[0]
-    test_image = test_image.reshape(28, 28)
-    plt.imshow(test_image)
-    plt.show()
+    hog_for_array(x_train[0:10])
+
 
 
 if __name__ == '__main__':
